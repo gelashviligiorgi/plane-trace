@@ -9,7 +9,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const rawPlanes = useBasicPlanes()
-  const details = usePlaneDetails(selectedId)
+  const { details, error } = usePlaneDetails(selectedId)
   const planes = useInterpolatedPlanes(rawPlanes, details)
 
   return (
@@ -22,6 +22,7 @@ export default function App() {
       />
       <PlaneDetailPanel
         details={details}
+        error={error}
         onClose={() => setSelectedId(null)}
       />
     </div>

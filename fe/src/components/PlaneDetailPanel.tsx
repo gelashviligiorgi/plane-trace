@@ -22,11 +22,12 @@ function fmtDuration(mins: number) {
 
 interface Props {
   details: PlaneDetailed | null
+  error: string | null
   onClose: () => void
 }
 
-export function PlaneDetailPanel({ details, onClose }: Props) {
-  const visible = details !== null
+export function PlaneDetailPanel({ details, error, onClose }: Props) {
+  const visible = details !== null || error !== null
 
   const elapsedMinutes = details ? (Date.now() - details.departureTime) / 60_000 : 0
   const pct = details ? routeProgress(details.latitude, details.longitude, details.origin.airport, details.destination.airport) : 0
@@ -42,7 +43,25 @@ export function PlaneDetailPanel({ details, onClose }: Props) {
         ${visible ? 'translate-x-0' : 'translate-x-full'}
       `}
     >
-      {details && (
+      {error && (
+        <div className="p-4 space-y-4">
+          <div className="flex items-start justify-between">
+            <h2 className="text-xl font-bold">Flight Unavailable</h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-white text-xl leading-none">×</button>
+          </div>
+          <div className="bg-gray-800 rounded-lg p-4 space-y-2">
+            <p className="text-orange-400 font-semibold text-sm">No information available for this flight.</p>
+            <p className="text-gray-400 text-sm">Possible reasons:</p>
+            <ul className="text-gray-400 text-sm space-y-1 list-disc list-inside">
+              <li>The flight has landed or been cancelled</li>
+              <li>The aircraft is temporarily out of range</li>
+              <li>The flight data feed was interrupted</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {!error && details && (
         <div className="p-4 space-y-4">
 
           <div className="flex items-start justify-between">

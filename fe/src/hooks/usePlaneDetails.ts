@@ -4,8 +4,9 @@ import type { PlaneDetailed } from '../types'
 const WS_URL = 'ws://localhost:4000/ws/planes/details'
 const MAX_RETRIES = 5
 
-export function usePlaneDetails(selectedId: string | null): PlaneDetailed | null {
+export function usePlaneDetails(selectedId: string | null): { details: PlaneDetailed | null; error: string | null } {
   const [details, setDetails] = useState<PlaneDetailed | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const retries = useRef(0)
   const ws = useRef<WebSocket | null>(null)
 
@@ -24,9 +25,15 @@ export function usePlaneDetails(selectedId: string | null): PlaneDetailed | null
         const msg = JSON.parse(event.data as string)
         if (msg.type === 'plane-details') {
           setDetails(msg.data)
+          setError(null)
           retries.current = 0
         } else if (msg.type === 'error') {
-          console.warn('WS details error:', msg.message)
+          if ((msg.message as string).includes('not found')) {
+            setError(msg.message as string)
+            setDetails(null)
+          } else {
+            console.warn('WS details error:', msg.message)
+          }
         }
       }
 
@@ -54,5 +61,5 @@ export function usePlaneDetails(selectedId: string | null): PlaneDetailed | null
     }
   }, [selectedId])
 
-  return details
+  return { details, error }
 }
